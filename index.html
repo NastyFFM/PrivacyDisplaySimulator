@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Privacy Display Simulator</title>
+<style>
+  :root { --bg:#0b0b0f; --fg:#fff; --mut:#9aa0aa; --acc:#3e91ff; --card:#1c1c22; }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; background:var(--bg); color:var(--fg); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  body { display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  button { font:inherit; cursor:pointer; border:0; }
+
+  /* Phone: fills the viewport on mobile, framed on desktop */
+  .phone { position:relative; width:100vw; height:100dvh; display:flex; flex-direction:column; background:#000; overflow:hidden; }
+  @media (min-width:600px) and (pointer:fine) {
+    .phone { width:390px; height:min(820px,94vh); border-radius:44px; border:10px solid #22232a; box-shadow:0 30px 80px #000a; }
+  }
+  .screen { position:relative; flex:1; overflow:hidden; background:#f4f4f7; color:#111; }
+
+  /* The privacy shield: black overlay whose opacity follows the viewing angle */
+  [data-shield] { position:relative; --dim:0; }
+  [data-shield]::after { content:""; position:absolute; inset:0; background:#000; opacity:var(--dim); border-radius:inherit; pointer-events:none; z-index:5; }
+
+  .status { display:flex; justify-content:space-between; padding:10px 22px 6px; font-size:13px; font-weight:600; }
+  .scene { position:absolute; inset:36px 0 0; display:none; flex-direction:column; }
+  .scene.on { display:flex; }
+
+  /* Chat app */
+  .appbar { padding:8px 20px 14px; font-size:22px; font-weight:700; display:flex; align-items:center; gap:12px; }
+  .avatar { width:38px; height:38px; border-radius:50%; background:#ffb36b; display:grid; place-items:center; font-size:16px; color:#fff; }
+  .msgs { flex:1; padding:8px 14px; display:flex; flex-direction:column; gap:10px; overflow:auto; }
+  .b { max-width:78%; padding:10px 14px; border-radius:20px; font-size:15px; line-height:1.35; background:#fff; }
+  .b.me { align-self:flex-end; background:#3e91ff; color:#fff; }
+
+  /* Feed + notification */
+  .feed { flex:1; padding:6px 14px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+  .card { background:#fff; border-radius:22px; padding:14px; }
+  .card .img { height:120px; border-radius:14px; margin-bottom:10px; }
+  .card h4 { font-size:15px; margin-bottom:4px; }
+  .card p { font-size:13px; color:#666; }
+  .notif { position:absolute; left:10px; right:10px; top:6px; background:#fff; border-radius:24px; padding:14px 16px; box-shadow:0 8px 30px #0003;
+           display:flex; gap:12px; align-items:center; transform:translateY(-160%); transition:transform .45s cubic-bezier(.2,.9,.3,1.2); z-index:10; }
+  .notif.show { transform:none; }
+  .notif .ic { width:40px; height:40px; border-radius:12px; background:#2fbf71; display:grid; place-items:center; color:#fff; font-weight:700; flex:none; }
+  .notif b { font-size:14px; } .notif div div { font-size:14px; color:#333; }
+
+  /* Bank app */
+  .bank { flex:1; display:flex; flex-direction:column; background:linear-gradient(#0d3b8c,#1659c7); color:#fff; padding:10px 22px 16px; }
+  .bal { margin:18px 0 26px; } .bal small { opacity:.75; } .bal div { font-size:34px; font-weight:700; margin-top:4px; }
+  .dots { display:flex; gap:14px; justify-content:center; margin:6px 0 18px; }
+  .dots i { width:14px; height:14px; border-radius:50%; border:2px solid #fff; }
+  .dots i.f { background:#fff; }
+  .pad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:auto; }
+  .pad button { height:54px; border-radius:16px; background:#ffffff22; color:#fff; font-size:22px; }
+
+  /* Full-screen overlays: intro, calibration, end */
+  .ov { position:absolute; inset:0; z-index:30; background:var(--bg); color:var(--fg); display:none; flex-direction:column; justify-content:center; padding:32px 28px; gap:18px; text-align:center; }
+  .ov.on { display:flex; }
+  .ov h1 { font-size:28px; line-height:1.15; } .ov p { color:var(--mut); font-size:16px; line-height:1.45; }
+  .btn { background:var(--acc); color:#fff; padding:15px 22px; border-radius:30px; font-size:17px; font-weight:600; }
+  .btn.ghost { background:#ffffff14; }
+  .count { font-size:72px; font-weight:700; min-height:86px; }
+  .phoneicon { width:70px; height:120px; margin:0 auto; border:4px solid #fff; border-radius:16px; position:relative; }
+  .phoneicon::after { content:"👀"; position:absolute; inset:0; display:grid; place-items:center; font-size:28px; }
+
+  /* Coach bar (our UI, never dimmed) */
+  .coach { position:relative; z-index:20; background:#111216; color:#fff; padding:14px 18px calc(14px + env(safe-area-inset-bottom)); display:none; flex-direction:column; gap:10px; }
+  .coach.on { display:flex; }
+  .coach .t { font-size:12px; color:var(--acc); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .coach .x { font-size:15px; line-height:1.35; }
+  .row { display:flex; align-items:center; gap:10px; }
+  .meter { flex:1; height:6px; border-radius:3px; background:#ffffff1f; overflow:hidden; }
+  .meter i { display:block; height:100%; width:0; background:var(--acc); }
+  .deg { font-variant-numeric:tabular-nums; font-size:13px; color:var(--mut); width:86px; text-align:right; }
+  .tg { display:flex; align-items:center; gap:8px; font-size:14px; background:#ffffff12; padding:8px 12px; border-radius:20px; }
+  .tg input { accent-color:var(--acc); width:18px; height:18px; }
+  .nav { display:flex; gap:8px; } .nav .btn { flex:1; padding:12px; font-size:15px; }
+  input[type=range] { width:100%; accent-color:var(--acc); }
+  .hint { font-size:12px; color:var(--mut); }
+
+  .rotate { display:none; }
+  @media (orientation:landscape) and (max-height:500px) {
+    .rotate { display:grid; place-items:center; position:fixed; inset:0; background:var(--bg); z-index:99; font-size:18px; }
+  }
+</style>
+</head>
+<body>
+<div class="rotate">Bitte Handy hochkant halten.</div>
+
+<div class="phone">
+  <div class="screen" id="screen">
+    <div class="status"><span id="clock">9:41</span><span>5G ▮▮▮ 87%</span></div>
+
+    <!-- Scene: chat -->
+    <section class="scene" id="s-chat">
+      <div class="appbar"><div class="avatar">L</div>Lena</div>
+      <div class="msgs">
+        <div class="b">Hast du den Code für die Wohnung?</div>
+        <div class="b me">Klar: 4711 🔑 WLAN ist „Sonnenblume22“</div>
+        <div class="b">Danke! Und wie war der Arzttermin?</div>
+        <div class="b me">Ergebnis kommt Dienstag. Erzähl’s bitte noch niemandem 🙈</div>
+        <div class="b">Versprochen ❤️</div>
+      </div>
+    </section>
+
+    <!-- Scene: feed + notification -->
+    <section class="scene" id="s-feed">
+      <div class="appbar">Entdecken</div>
+      <div class="feed">
+        <div class="card"><div class="img" style="background:linear-gradient(135deg,#ff9a8b,#ff6a88)"></div><h4>10 Wochenendtrips mit dem Zug</h4><p>Reisen · 4 Min. Lesezeit</p></div>
+        <div class="card"><div class="img" style="background:linear-gradient(135deg,#8fd3f4,#84fab0)"></div><h4>Das perfekte Frühstück</h4><p>Food · 2 Min. Lesezeit</p></div>
+        <div class="card"><div class="img" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"></div><h4>Playlist der Woche</h4><p>Musik · 30 Songs</p></div>
+      </div>
+      <div class="notif" id="notif" data-shield>
+        <div class="ic">B</div>
+        <div><b>Meine Bank</b><div>Dein Bestätigungscode: 482 190. Gib ihn niemandem weiter.</div></div>
+      </div>
+    </section>
+
+    <!-- Scene: bank app -->
+    <section class="scene" id="s-bank">
+      <div class="bank" data-shield>
+        <div style="font-weight:700;font-size:18px">Meine Bank</div>
+        <div class="bal"><small>Girokonto</small><div>12.483,90 €</div></div>
+        <div style="text-align:center;margin-bottom:8px">PIN eingeben</div>
+        <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+        <div class="pad" id="pad"></div>
+      </div>
+    </section>
+
+    <!-- Overlays -->
+    <div class="ov on" id="o-intro">
+      <div class="phoneicon"></div>
+      <h1>Wer liest bei dir mit?</h1>
+      <p>In der Bahn, im Café, im Meeting: Dein Sitznachbar sieht deinen Bildschirm. Teste, wie das Privacy Display deine Inhalte vor seitlichen Blicken schützt.</p>
+      <button class="btn" id="start">Test starten</button>
+    </div>
+
+    <div class="ov" id="o-calib">
+      <h1>Kalibrierung</h1>
+      <p id="calibText">Halte dein Handy so, wie du normal liest, und schau frontal auf den Bildschirm.</p>
+      <div class="count" id="count"></div>
+      <button class="btn" id="calibOk">OK</button>
+    </div>
+
+    <div class="ov" id="o-end">
+      <h1>Du entscheidest, was privat bleibt.</h1>
+      <p>Ganzer Bildschirm, nur Benachrichtigungen oder ausgewählte Apps: Das Privacy Display schützt genau das, was niemand sehen soll.</p>
+      <button class="btn" id="again">Nochmal testen</button>
+      <button class="btn ghost" id="recal">Neu kalibrieren</button>
+    </div>
+  </div>
+
+  <div class="coach" id="coach">
+    <div class="t" id="cTitle"></div>
+    <div class="x" id="cText"></div>
+    <div class="row"><div class="meter"><i id="meter"></i></div><div class="deg" id="deg">0°</div></div>
+    <input type="range" id="slider" min="-60" max="60" value="0" aria-label="Blickwinkel simulieren">
+    <div class="row" id="toggles">
+      <label class="tg"><input type="checkbox" id="tPriv"> Privacy Display</label>
+      <label class="tg"><input type="checkbox" id="tMax"> Maximal</label>
+    </div>
+    <div class="nav"><button class="btn ghost" id="back">Zurück</button><button class="btn" id="next">Weiter</button></div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const STEPS = [
+  { scene:'chat', mode:'off',   title:'1 / 4 · Ohne Schutz',
+    text:'Kipp dein Handy zur Seite. Alles bleibt lesbar – genau das sieht heute dein Sitznachbar.' },
+  { scene:'chat', mode:'full',  title:'2 / 4 · Ganzer Bildschirm',
+    text:'Privacy Display ist an. Kipp wieder: Von der Seite wird der ganze Bildschirm dunkel, von vorne bleibt alles klar.' },
+  { scene:'feed', mode:'notif', title:'3 / 4 · Nur Benachrichtigungen',
+    text:'Dein Feed bleibt für alle sichtbar. Nur das private Pop-up verschwindet bei seitlichem Blick.' },
+  { scene:'bank', mode:'app',   title:'4 / 4 · Ausgewählte Apps',
+    text:'In deiner Banking-App schaltet sich der Schutz automatisch ein – inklusive PIN-Eingabe.' },
+];
+
+// Angle → shield opacity. Start/end angles in degrees.
+// ponytail: tuned by eye, adjust against a real S26 Ultra if available.
+const CURVE = { normal:[18, 35], max:[10, 24] };
+function dimFor(angle, max) {
+  const [a, b] = max ? CURVE.max : CURVE.normal;
+  return Math.min(1, Math.max(0, (Math.abs(angle) - a) / (b - a)));
+}
+console.assert(dimFor(0,false)===0 && dimFor(40,false)===1 && dimFor(-40,true)===1 && dimFor(17,true)>0, 'dimFor self-check');
+
+let step = -1, sensor = false, raw = { g:0, b:0 }, zero = { g:0, b:0 }, angle = 0;
+
+// --- Sensor ---------------------------------------------------------------
+addEventListener('deviceorientation', e => {
+  if (e.gamma == null) return;
+  if (!sensor) { sensor = true; $('slider').style.display = 'none'; }
+  raw = { g:e.gamma, b:e.beta };
+});
+
+async function askPermission() {
+  const D = window.DeviceOrientationEvent;
+  if (D && typeof D.requestPermission === 'function') {
+    try { await D.requestPermission(); } catch { /* denied → slider fallback */ }
+  }
+}
+
+// --- Render loop ----------------------------------------------------------
+function tick() {
+  let target;
+  if (sensor) {
+    const dg = raw.g - zero.g, db = raw.b - zero.b;
+    // Side tilt (gamma) drives the effect; forward/back only weakly,
+    // so laying the phone down does not black it out.
+    // ponytail: gamma wraps past ±90°, fine for a hand-held demo.
+    target = Math.sign(dg || 1) * Math.hypot(dg, db * 0.3);
+  } else {
+    target = +$('slider').value;
+  }
+  angle += (target - angle) * 0.2; // smoothing against sensor jitter
+
+  const s = STEPS[step];
+  if (s) {
+    const on = $('tPriv').checked;
+    const d = on ? dimFor(angle, $('tMax').checked) : 0;
+    $('screen').style.setProperty('--dim', s.mode === 'full' ? d : 0);
+    document.querySelectorAll('.scene.on [data-shield]').forEach(el => el.style.setProperty('--dim', d));
+    const a = Math.round(Math.abs(angle));
+    $('deg').textContent = `${a}° ${a < 8 ? 'frontal' : 'seitlich'}`;
+    $('meter').style.width = Math.min(100, a / 45 * 100) + '%';
+  }
+  requestAnimationFrame(tick);
+}
+
+// --- Flow -----------------------------------------------------------------
+function overlay(id) {
+  document.querySelectorAll('.ov').forEach(o => o.classList.toggle('on', o.id === id));
+  $('coach').classList.toggle('on', !id);
+}
+
+let notifTimer;
+function go(i) {
+  if (i >= STEPS.length) { step = -1; $('screen').style.setProperty('--dim', 0); return overlay('o-end'); }
+  step = Math.max(0, i);
+  const s = STEPS[step];
+  overlay(null);
+  document.querySelectorAll('.scene').forEach(el => el.classList.toggle('on', el.id === 's-' + s.scene));
+  if (s.mode === 'full') $('screen').setAttribute('data-shield', '');
+  else { $('screen').removeAttribute('data-shield'); $('screen').style.setProperty('--dim', 0); }
+  $('cTitle').textContent = s.title;
+  $('cText').textContent = s.text;
+  $('tPriv').checked = s.mode !== 'off';
+  $('tMax').checked = false;
+  $('toggles').style.display = s.mode === 'off' ? 'none' : '';
+  $('back').style.visibility = step === 0 ? 'hidden' : '';
+  $('next').textContent = step === STEPS.length - 1 ? 'Fertig' : 'Weiter';
+
+  clearTimeout(notifTimer);
+  $('notif').classList.remove('show');
+  if (s.scene === 'feed') notifTimer = setTimeout(() => $('notif').classList.add('show'), 1200);
+  if (s.scene === 'bank') pin = '', drawPin();
+}
+
+function calibrate() {
+  overlay('o-calib');
+  $('calibOk').style.display = '';
+  $('count').textContent = '';
+  $('calibText').textContent = 'Halte dein Handy so, wie du normal liest, und schau frontal auf den Bildschirm.';
+}
+
+$('calibOk').onclick = () => {
+  $('calibOk').style.display = 'none';
+  $('calibText').textContent = 'Ruhig halten …';
+  const samples = [];
+  let n = 3;
+  $('count').textContent = n;
+  const sample = setInterval(() => samples.push({ ...raw }), 50);
+  const cd = setInterval(() => {
+    if (--n > 0) return void ($('count').textContent = n);
+    clearInterval(cd); clearInterval(sample);
+    if (sensor && samples.length) {
+      zero = {
+        g: samples.reduce((s, x) => s + x.g, 0) / samples.length,
+        b: samples.reduce((s, x) => s + x.b, 0) / samples.length,
+      };
+    }
+    $('slider').value = 0; angle = 0;
+    go(0);
+  }, 700);
+};
+
+$('start').onclick = async () => { await askPermission(); calibrate(); };
+$('next').onclick = () => go(step + 1);
+$('back').onclick = () => go(step - 1);
+$('again').onclick = () => go(0);
+$('recal').onclick = calibrate;
+$('notif').onclick = () => { $('notif').classList.remove('show'); notifTimer = setTimeout(() => $('notif').classList.add('show'), 1500); };
+
+// PIN pad
+let pin = '';
+const drawPin = () => [...$('dots').children].forEach((d, i) => d.classList.toggle('f', i < pin.length));
+['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k => {
+  const b = document.createElement('button');
+  b.textContent = k;
+  if (!k) b.style.visibility = 'hidden';
+  b.onclick = () => { pin = k === '⌫' ? pin.slice(0, -1) : (pin + k).slice(0, 4); drawPin(); if (pin.length === 4) setTimeout(() => (pin = '', drawPin()), 600); };
+  $('pad').appendChild(b);
+});
+
+const clock = () => $('clock').textContent = new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' });
+clock(); setInterval(clock, 30000);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
