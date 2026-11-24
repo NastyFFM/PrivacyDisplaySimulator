@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -86,7 +86,7 @@
 </style>
 </head>
 <body>
-<div class="rotate">Bitte Handy hochkant halten.</div>
+<div class="rotate">Please hold your phone upright.</div>
 
 <div class="phone">
   <div class="screen" id="screen">
@@ -96,34 +96,34 @@
     <section class="scene" id="s-chat">
       <div class="appbar"><div class="avatar">L</div>Lena</div>
       <div class="msgs">
-        <div class="b">Hast du den Code für die Wohnung?</div>
-        <div class="b me">Klar: 4711 🔑 WLAN ist „Sonnenblume22“</div>
-        <div class="b">Danke! Und wie war der Arzttermin?</div>
-        <div class="b me">Ergebnis kommt Dienstag. Erzähl’s bitte noch niemandem 🙈</div>
-        <div class="b">Versprochen ❤️</div>
+        <div class="b">Do you have the code for the apartment?</div>
+        <div class="b me">Sure: 4711 🔑 Wi-Fi is “Sunflower22”</div>
+        <div class="b">Thanks! And how was the doctor’s appointment?</div>
+        <div class="b me">Results come Tuesday. Please don’t tell anyone yet 🙈</div>
+        <div class="b">Promise ❤️</div>
       </div>
     </section>
 
     <!-- Scene: feed + notification -->
     <section class="scene" id="s-feed">
-      <div class="appbar">Entdecken</div>
+      <div class="appbar">Discover</div>
       <div class="feed">
-        <div class="card"><div class="img" style="background:linear-gradient(135deg,#ff9a8b,#ff6a88)"></div><h4>10 Wochenendtrips mit dem Zug</h4><p>Reisen · 4 Min. Lesezeit</p></div>
-        <div class="card"><div class="img" style="background:linear-gradient(135deg,#8fd3f4,#84fab0)"></div><h4>Das perfekte Frühstück</h4><p>Food · 2 Min. Lesezeit</p></div>
-        <div class="card"><div class="img" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"></div><h4>Playlist der Woche</h4><p>Musik · 30 Songs</p></div>
+        <div class="card"><div class="img" style="background:linear-gradient(135deg,#ff9a8b,#ff6a88)"></div><h4>10 weekend trips by train</h4><p>Travel · 4 min read</p></div>
+        <div class="card"><div class="img" style="background:linear-gradient(135deg,#8fd3f4,#84fab0)"></div><h4>The perfect breakfast</h4><p>Food · 2 min read</p></div>
+        <div class="card"><div class="img" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)"></div><h4>Playlist of the week</h4><p>Music · 30 songs</p></div>
       </div>
       <div class="notif" id="notif" data-shield>
         <div class="ic">B</div>
-        <div><b>Meine Bank</b><div>Dein Bestätigungscode: 482 190. Gib ihn niemandem weiter.</div></div>
+        <div><b>My Bank</b><div>Your verification code: 482 190. Don’t share it with anyone.</div></div>
       </div>
     </section>
 
     <!-- Scene: bank app -->
     <section class="scene" id="s-bank">
       <div class="bank" data-shield>
-        <div style="font-weight:700;font-size:18px">Meine Bank</div>
-        <div class="bal"><small>Girokonto</small><div>12.483,90 €</div></div>
-        <div style="text-align:center;margin-bottom:8px">PIN eingeben</div>
+        <div style="font-weight:700;font-size:18px">My Bank</div>
+        <div class="bal"><small>Checking account</small><div>€12,483.90</div></div>
+        <div style="text-align:center;margin-bottom:8px">Enter PIN</div>
         <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
         <div class="pad" id="pad"></div>
       </div>
@@ -132,23 +132,23 @@
     <!-- Overlays -->
     <div class="ov on" id="o-intro">
       <div class="phoneicon"></div>
-      <h1>Wer liest bei dir mit?</h1>
-      <p>In der Bahn, im Café, im Meeting: Dein Sitznachbar sieht deinen Bildschirm. Teste, wie das Privacy Display deine Inhalte vor seitlichen Blicken schützt.</p>
-      <button class="btn" id="start">Test starten</button>
+      <h1>Who’s reading along?</h1>
+      <p>On the train, in a café, in a meeting: the person next to you can see your screen. Try how Privacy Display protects your content from side glances.</p>
+      <button class="btn" id="start">Start test</button>
     </div>
 
     <div class="ov" id="o-calib">
-      <h1>Kalibrierung</h1>
-      <p id="calibText">Halte dein Handy so, wie du normal liest, und schau frontal auf den Bildschirm.</p>
+      <h1>Calibration</h1>
+      <p id="calibText">Hold your phone the way you normally read and look straight at the screen.</p>
       <div class="count" id="count"></div>
       <button class="btn" id="calibOk">OK</button>
     </div>
 
     <div class="ov" id="o-end">
-      <h1>Du entscheidest, was privat bleibt.</h1>
-      <p>Ganzer Bildschirm, nur Benachrichtigungen oder ausgewählte Apps: Das Privacy Display schützt genau das, was niemand sehen soll.</p>
-      <button class="btn" id="again">Nochmal testen</button>
-      <button class="btn ghost" id="recal">Neu kalibrieren</button>
+      <h1>You decide what stays private.</h1>
+      <p>Full screen, notifications only or selected apps: Privacy Display protects exactly what nobody else should see.</p>
+      <button class="btn" id="again">Try again</button>
+      <button class="btn ghost" id="recal">Recalibrate</button>
     </div>
   </div>
 
@@ -156,12 +156,12 @@
     <div class="t" id="cTitle"></div>
     <div class="x" id="cText"></div>
     <div class="row"><div class="meter"><i id="meter"></i></div><div class="deg" id="deg">0°</div></div>
-    <input type="range" id="slider" min="-60" max="60" value="0" aria-label="Blickwinkel simulieren">
+    <input type="range" id="slider" min="-60" max="60" value="0" aria-label="Simulate viewing angle">
     <div class="row" id="toggles">
       <label class="tg"><input type="checkbox" id="tPriv"> Privacy Display</label>
-      <label class="tg"><input type="checkbox" id="tMax"> Maximal</label>
+      <label class="tg"><input type="checkbox" id="tMax"> Maximum</label>
     </div>
-    <div class="nav"><button class="btn ghost" id="back">Zurück</button><button class="btn" id="next">Weiter</button></div>
+    <div class="nav"><button class="btn ghost" id="back">Back</button><button class="btn" id="next">Next</button></div>
   </div>
 </div>
 
@@ -169,14 +169,14 @@
 const $ = id => document.getElementById(id);
 
 const STEPS = [
-  { scene:'chat', mode:'off',   title:'1 / 4 · Ohne Schutz',
-    text:'Kipp dein Handy zur Seite. Alles bleibt lesbar – genau das sieht heute dein Sitznachbar.' },
-  { scene:'chat', mode:'full',  title:'2 / 4 · Ganzer Bildschirm',
-    text:'Privacy Display ist an. Kipp wieder: Von der Seite wird der ganze Bildschirm dunkel, von vorne bleibt alles klar.' },
-  { scene:'feed', mode:'notif', title:'3 / 4 · Nur Benachrichtigungen',
-    text:'Dein Feed bleibt für alle sichtbar. Nur das private Pop-up verschwindet bei seitlichem Blick.' },
-  { scene:'bank', mode:'app',   title:'4 / 4 · Ausgewählte Apps',
-    text:'In deiner Banking-App schaltet sich der Schutz automatisch ein – inklusive PIN-Eingabe.' },
+  { scene:'chat', mode:'off',   title:'1 / 4 · No protection',
+    text:'Tilt your phone to the side. Everything stays readable – that’s what the person next to you sees today.' },
+  { scene:'chat', mode:'full',  title:'2 / 4 · Full screen',
+    text:'Privacy Display is on. Tilt again: from the side the whole screen goes dark, from the front everything stays clear.' },
+  { scene:'feed', mode:'notif', title:'3 / 4 · Notifications only',
+    text:'Your feed stays visible to everyone. Only the private pop-up disappears when viewed from the side.' },
+  { scene:'bank', mode:'app',   title:'4 / 4 · Selected apps',
+    text:'In your banking app the protection turns on automatically – including PIN entry.' },
 ];
 
 // Angle → shield opacity. Start/end angles in degrees.
@@ -225,7 +225,7 @@ function tick() {
     $('screen').style.setProperty('--dim', s.mode === 'full' ? d : 0);
     document.querySelectorAll('.scene.on [data-shield]').forEach(el => el.style.setProperty('--dim', d));
     const a = Math.round(Math.abs(angle));
-    $('deg').textContent = `${a}° ${a < 8 ? 'frontal' : 'seitlich'}`;
+    $('deg').textContent = `${a}° ${a < 8 ? 'front' : 'side'}`;
     $('meter').style.width = Math.min(100, a / 45 * 100) + '%';
   }
   requestAnimationFrame(tick);
@@ -252,7 +252,7 @@ function go(i) {
   $('tMax').checked = false;
   $('toggles').style.display = s.mode === 'off' ? 'none' : '';
   $('back').style.visibility = step === 0 ? 'hidden' : '';
-  $('next').textContent = step === STEPS.length - 1 ? 'Fertig' : 'Weiter';
+  $('next').textContent = step === STEPS.length - 1 ? 'Finish' : 'Next';
 
   clearTimeout(notifTimer);
   $('notif').classList.remove('show');
@@ -264,12 +264,12 @@ function calibrate() {
   overlay('o-calib');
   $('calibOk').style.display = '';
   $('count').textContent = '';
-  $('calibText').textContent = 'Halte dein Handy so, wie du normal liest, und schau frontal auf den Bildschirm.';
+  $('calibText').textContent = 'Hold your phone the way you normally read and look straight at the screen.';
 }
 
 $('calibOk').onclick = () => {
   $('calibOk').style.display = 'none';
-  $('calibText').textContent = 'Ruhig halten …';
+  $('calibText').textContent = 'Hold still …';
   const samples = [];
   let n = 3;
   $('count').textContent = n;
@@ -306,7 +306,7 @@ const drawPin = () => [...$('dots').children].forEach((d, i) => d.classList.togg
   $('pad').appendChild(b);
 });
 
-const clock = () => $('clock').textContent = new Date().toLocaleTimeString('de-DE', { hour:'2-digit', minute:'2-digit' });
+const clock = () => $('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
 clock(); setInterval(clock, 30000);
 requestAnimationFrame(tick);
 </script>
